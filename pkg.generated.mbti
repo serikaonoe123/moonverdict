@@ -8,6 +8,8 @@ import {
 // Values
 pub fn compare(Snapshot, Snapshot) -> Report raise InputError
 
+pub fn needs_review(Report) -> Bool
+
 pub fn parse_observed(String) -> ObservedArtifacts raise
 
 pub fn parse_snapshot(String) -> Snapshot raise
@@ -51,6 +53,8 @@ pub(all) struct Report {
   before_revision : String
   after_revision : String
   findings : Array[Finding]
+  test_changes : Array[TestChange]
+  witness_changes : Array[WitnessChange]
   evidence_level : String
 } derive(ToJson)
 pub fn Report::to_json(Self) -> Json
@@ -85,6 +89,27 @@ pub(all) struct Solution {
 } derive(ToJson, @json.FromJson)
 pub fn Solution::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
 pub fn Solution::to_json(Self) -> Json
+
+pub(all) struct TestChange {
+  kind : String
+  before_ids : Array[String]
+  after_ids : Array[String]
+  before_digest : String?
+  after_digest : String?
+}
+pub fn TestChange::to_json(Self) -> Json
+pub impl ToJson for TestChange
+
+pub(all) struct WitnessChange {
+  solution : String
+  before_test : String
+  before_verdict : String
+  content_status : String
+  after_test : String?
+  after_verdict : String?
+}
+pub fn WitnessChange::to_json(Self) -> Json
+pub impl ToJson for WitnessChange
 
 // Type aliases
 

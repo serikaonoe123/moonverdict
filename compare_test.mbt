@@ -248,6 +248,8 @@ test "HTML treats artifact IDs as text" {
     before_revision: "<script>alert(1)</script>",
     after_revision: "r2",
     findings: [],
+    test_changes: [],
+    witness_changes: [],
     evidence_level: "fixture",
   }
   let html = @moonverdict.report_html(report)

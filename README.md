@@ -2,7 +2,7 @@
 
 MoonVerdict 是面向算法竞赛出题人的验题记录比较工具，以 MoonBit 实现分析核心。
 
-当前版本为 **0.0.1 原型**。已实现标准 JSON 快照导入、输入校验、解法内容身份匹配、判定比较、原始文件摘要核对，以及 JSON / 离线 HTML 报告。
+当前版本为 **0.0.1 原型**。已实现标准 JSON 快照导入、输入校验、解法和测试内容身份匹配、测试增删改清单、失败证据追踪、判定比较、原始文件摘要核对，以及 JSON / 离线 HTML 报告。
 
 ## 运行
 
@@ -16,7 +16,7 @@ moon run cmd/moonverdict --target js -- examples/before.json examples/after.json
 moon run cmd/moonverdict --target js -- examples/before.json examples/after.json html > report.html
 ```
 
-最后两条命令发现需审查变化时退出码为 1，这是预期结果。相同完整记录比较退出码为 0，输入或读取错误为 2。PowerShell 重定向 HTML 时使用 UTF-8 编码；也可直接运行构建后的 Node 程序。
+最后两条命令发现需审查变化时退出码为 1，这是预期结果。仅测试数据变化而没有判定回归，也会返回 1。相同完整记录比较退出码为 0，输入或读取错误为 2。PowerShell 重定向 HTML 时使用 UTF-8 编码；也可直接运行构建后的 Node 程序。
 
 当前文件命令行使用 JS/Node 后端。核心支持 native、JS 和 wasm-gc；原生命令行尚未实现。HTML 目前为可离线阅读的结构化结果，交互报告待开发。
 
@@ -48,7 +48,7 @@ moon run cmd/moonverdict --target js -- verify examples/evidence/snapshot.json e
 
 此命令以清单所在目录为根，读取原始输入、答案和解法文件，用 SHA-256 核对内容。详见 [证据格式](docs/EVIDENCE.md)。核对通过仅说明当前文件内容与所提供摘要相符，不证明历史运行记录的来源；输出保留 `run_binding_verified: false`。
 
-测试内容匹配、具体测试增删改清单、编译及资源条件结构化建模、Polygon 离线适配、运行来源绑定和用户试用待完成。自动测试配置已加入仓库，云端结果以实际运行记录为准。这个原型不宣称完成计划书验收。
+测试内容匹配与失败证据清单的规则见 [测试变化说明](docs/TEST-CHANGES.md)。编译及资源条件结构化建模、Polygon 离线适配、运行来源绑定和用户试用待完成。自动测试配置已加入仓库，云端结果以实际运行记录为准。这个原型不宣称完成计划书验收。
 
 项目不需要线上凭证。真实适配将依据 [Polygon API](https://codeforces.github.io/polygon-misc/API#probleminvocation)，特别处理 RJ/NO/TS、缺项和包级验证结果；目前尚未实现或验收该适配器。
 

@@ -13,7 +13,11 @@ def run(*args):
     return subprocess.run(["node", str(CLI), *map(str, args)], capture_output=True, text=True, encoding="utf-8")
 
 
+checks = 0
+
 def check(condition, message):
+    global checks
+    checks += 1
     if not condition:
         raise AssertionError(message)
 
@@ -40,8 +44,15 @@ mismatch = run("verify", evidence / "mismatch.json", evidence / "bundle.json")
 check(mismatch.returncode == 1 and json.loads(mismatch.stdout)["artifact_bytes_match"] is False, "mismatch")
 check(run("verify", evidence / "snapshot.json", evidence / "absent.json").returncode == 2, "missing evidence manifest")
 
+replacement = run(BEFORE, ROOT / "examples/replaced.json")
+report = json.loads(replacement.stdout)
+check(replacement.returncode == 1 and not report["findings"], "data-only change requires review")
+check(any(t["kind"] == "modified" and t["before_ids"] == ["large"] for t in report["test_changes"]), "replacement identified")
+lost = json.loads(changed.stdout)["witness_changes"]
+check(lost[0]["before_test"] == "large" and lost[0]["content_status"] == "removed" and lost[0]["after_test"] is None, "removed witness linked")
+
 results = ROOT / "results"
 results.mkdir(exist_ok=True)
 (results / "example-report.html").write_text(html.stdout, encoding="utf-8")
 (results / "example-report.json").write_text(changed.stdout, encoding="utf-8")
-print("CLI: 12 checks passed; example reports written to results/.")
+print(f"CLI: {checks} assertions passed; example reports written to results/.")

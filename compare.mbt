@@ -28,6 +28,8 @@ pub fn compare(before : Snapshot, after : Snapshot) -> Report raise InputError {
     "different problems cannot be compared",
   )
   let findings : Array[Finding] = []
+  let test_changes = compare_tests(before.tests, after.tests)
+  let witness_changes : Array[WitnessChange] = []
   for sol in before.solutions {
     let previous = row(before, sol.id)
     if !before.finished ||
@@ -74,6 +76,24 @@ pub fn compare(before : Snapshot, after : Snapshot) -> Report raise InputError {
         message: "Not all required runs are final; no all-pass claim can be made.",
       })
     }
+    if sol.expected == "pass" {
+      let rejected = after.tests
+        .filter(t => {
+          match current.get(t.id) {
+            Some(v) => failure(v)
+            None => false
+          }
+        })
+        .map(t => t.id)
+      if rejected.length() > 0 {
+        findings.push({
+          code: "REFERENCE_REJECTED",
+          solution: sol.id,
+          evidence: rejected,
+          message: "A declared reference solution failed; review the solution, data and judge.",
+        })
+      }
+    }
     // Matching requires a unique digest on both sides, never just a reused name.
     let old_matches = before.solutions.filter(x => x.digest == sol.digest)
     let new_matches = after.solutions.filter(x => x.digest == sol.digest)
@@ -88,6 +108,30 @@ pub fn compare(before : Snapshot, after : Snapshot) -> Report raise InputError {
     }
     let old = old_matches[0]
     let previous = row(before, old.id)
+    for change in test_changes {
+      for old_test in change.before_ids {
+        if previous.get(old_test) is Some(verdict) && failure(verdict) {
+          let after_test = if change.after_ids.length() == 1 &&
+            change.kind != "ambiguous" {
+            Some(change.after_ids[0])
+          } else {
+            None
+          }
+          let after_verdict = match after_test {
+            Some(id) => current.get(id)
+            None => None
+          }
+          witness_changes.push({
+            solution: sol.id,
+            before_test: old_test,
+            before_verdict: verdict,
+            content_status: change.kind,
+            after_test,
+            after_verdict,
+          })
+        }
+      }
+    }
     if old.expected != sol.expected {
       findings.push({
         code: "EXPECTATION_CHANGED",
@@ -119,29 +163,13 @@ pub fn compare(before : Snapshot, after : Snapshot) -> Report raise InputError {
         message: "Previously observed failures now pass all required tests; artifact bindings are supplied, not independently verified.",
       })
     }
-    if sol.expected == "pass" {
-      let rejected = after.tests
-        .filter(t => {
-          match current.get(t.id) {
-            Some(v) => failure(v)
-            None => false
-          }
-        })
-        .map(t => t.id)
-      if rejected.length() > 0 {
-        findings.push({
-          code: "REFERENCE_REJECTED",
-          solution: sol.id,
-          evidence: rejected,
-          message: "A declared reference solution failed; review the solution, data and judge.",
-        })
-      }
-    }
   }
   {
     before_revision: before.revision,
     after_revision: after.revision,
     findings,
+    test_changes,
+    witness_changes,
     evidence_level: "supplied-metadata-unverified",
   }
 }

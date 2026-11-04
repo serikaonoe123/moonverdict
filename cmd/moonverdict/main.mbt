@@ -52,7 +52,7 @@ fn main {
         @verdict.report_json(report)
       },
     )
-    if report.findings.length() > 0 {
+    if @verdict.needs_review(report) {
       set_exit(1)
     }
   } catch {

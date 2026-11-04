@@ -45,9 +45,67 @@ pub(all) struct Report {
   before_revision : String
   after_revision : String
   findings : Array[Finding]
+  test_changes : Array[TestChange]
+  witness_changes : Array[WitnessChange]
   // Claims in this prototype are conditional on the supplied artifact metadata.
   evidence_level : String
 } derive(ToJson)
+
+///|
+pub(all) struct TestChange {
+  kind : String
+  before_ids : Array[String]
+  after_ids : Array[String]
+  before_digest : String?
+  after_digest : String?
+}
+
+///|
+pub extend TestChange with ToJson::{to_json}
+
+///|
+pub(all) struct WitnessChange {
+  solution : String
+  before_test : String
+  before_verdict : String
+  content_status : String
+  after_test : String?
+  after_verdict : String?
+}
+
+///|
+fn optional_string(value : String?) -> Json {
+  match value {
+    Some(text) => Json::string(text)
+    None => Json::null()
+  }
+}
+
+///|
+pub impl ToJson for TestChange with fn to_json(self) {
+  {
+    "kind": self.kind,
+    "before_ids": self.before_ids,
+    "after_ids": self.after_ids,
+    "before_digest": optional_string(self.before_digest),
+    "after_digest": optional_string(self.after_digest),
+  }
+}
+
+///|
+pub impl ToJson for WitnessChange with fn to_json(self) {
+  {
+    "solution": self.solution,
+    "before_test": self.before_test,
+    "before_verdict": self.before_verdict,
+    "content_status": self.content_status,
+    "after_test": optional_string(self.after_test),
+    "after_verdict": optional_string(self.after_verdict),
+  }
+}
+
+///|
+pub extend WitnessChange with ToJson::{to_json}
 
 ///|
 pub suberror InputError {
