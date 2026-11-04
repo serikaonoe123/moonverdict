@@ -1,0 +1,4 @@
+* text=auto eol=lf
+examples/evidence/*.in -text
+examples/evidence/*.ans -text
+examples/evidence/*.py -text

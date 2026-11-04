@@ -2,7 +2,6 @@
 import json
 from pathlib import Path
 import subprocess
-import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 CLI = ROOT / "_build/js/debug/build/cmd/moonverdict/moonverdict.js"
@@ -29,19 +28,20 @@ check(html.returncode == 1 and html.stdout.startswith("<!doctype html>"), "HTML"
 check(run().returncode == 2, "usage")
 check(run(BEFORE, ROOT / "no-such-file.json").returncode == 2, "missing file")
 check(run(BEFORE, AFTER, "typo").returncode == 2, "invalid format")
-with tempfile.TemporaryDirectory(prefix="moonverdict-cli-") as temp:
-    invalid = Path(temp) / "invalid.json"
-    invalid.write_text("{", encoding="utf-8")
-    check(run(BEFORE, invalid).returncode == 2, "malformed input")
-    value = json.loads(AFTER.read_text(encoding="utf-8"))
-    value["runs"] = []
-    invalid.write_text(json.dumps(value), encoding="utf-8")
-    incomplete = run(BEFORE, invalid)
-    codes = [f["code"] for f in json.loads(incomplete.stdout)["findings"]]
-    check(incomplete.returncode == 1 and "INCOMPLETE" in codes and "KNOWN_FAILURE_LOST" not in codes, "missing results")
+check(run(BEFORE, ROOT / "examples/invalid.json").returncode == 2, "malformed input")
+incomplete = run(BEFORE, ROOT / "examples/incomplete.json")
+codes = [f["code"] for f in json.loads(incomplete.stdout)["findings"]]
+check(incomplete.returncode == 1 and "INCOMPLETE" in codes and "KNOWN_FAILURE_LOST" not in codes, "missing results")
+evidence = ROOT / "examples/evidence"
+verified = run("verify", evidence / "snapshot.json", evidence / "bundle.json")
+check(verified.returncode == 0 and json.loads(verified.stdout)["artifact_bytes_match"] is True, "independent framed SHA-256 oracle")
+check(json.loads(verified.stdout)["run_binding_verified"] is False, "byte match is not run provenance")
+mismatch = run("verify", evidence / "mismatch.json", evidence / "bundle.json")
+check(mismatch.returncode == 1 and json.loads(mismatch.stdout)["artifact_bytes_match"] is False, "mismatch")
+check(run("verify", evidence / "snapshot.json", evidence / "absent.json").returncode == 2, "missing evidence manifest")
 
 results = ROOT / "results"
 results.mkdir(exist_ok=True)
 (results / "example-report.html").write_text(html.stdout, encoding="utf-8")
 (results / "example-report.json").write_text(changed.stdout, encoding="utf-8")
-print("CLI: 8 checks passed; example reports written to results/.")
+print("CLI: 12 checks passed; example reports written to results/.")

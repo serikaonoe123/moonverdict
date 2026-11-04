@@ -8,6 +8,8 @@ import {
 // Values
 pub fn compare(Snapshot, Snapshot) -> Report raise InputError
 
+pub fn parse_observed(String) -> ObservedArtifacts raise
+
 pub fn parse_snapshot(String) -> Snapshot raise
 
 pub fn report_html(Report) -> String
@@ -15,6 +17,8 @@ pub fn report_html(Report) -> String
 pub fn report_json(Report) -> String
 
 pub fn validate(Snapshot) -> Unit raise InputError
+
+pub fn verify_artifacts(Snapshot, ObservedArtifacts) -> Array[String] raise InputError
 
 // Errors
 pub suberror InputError {
@@ -36,6 +40,12 @@ pub(all) struct Finding {
   message : String
 } derive(ToJson)
 pub fn Finding::to_json(Self) -> Json
+
+pub(all) struct ObservedArtifacts {
+  tests : Array[Artifact]
+  solutions : Array[Artifact]
+} derive(@json.FromJson)
+pub fn ObservedArtifacts::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
 
 pub(all) struct Report {
   before_revision : String

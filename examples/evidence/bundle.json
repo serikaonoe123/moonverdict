@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "tests": [
+    {
+      "id": "small",
+      "input": "small.in",
+      "answer": "small.ans"
+    },
+    {
+      "id": "large",
+      "input": "large.in",
+      "answer": "large.ans"
+    }
+  ],
+  "solutions": [
+    {
+      "id": "int32",
+      "files": [
+        "sum.py"
+      ]
+    }
+  ]
+}

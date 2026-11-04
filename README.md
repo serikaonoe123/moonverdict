@@ -2,7 +2,7 @@
 
 MoonVerdict 是面向算法竞赛出题人的验题记录比较工具，以 MoonBit 实现分析核心。
 
-当前版本为 **0.0.1 本地原型**。已实现标准 JSON 快照导入、输入校验、解法内容身份匹配、判定比较，以及 JSON / 离线 HTML 报告。
+当前版本为 **0.0.1 原型**。已实现标准 JSON 快照导入、输入校验、解法内容身份匹配、判定比较、原始文件摘要核对，以及 JSON / 离线 HTML 报告。
 
 ## 运行
 
@@ -38,9 +38,17 @@ moon run cmd/moonverdict --target js -- examples/before.json examples/after.json
 
 ## 证据边界
 
-`digest` 当前仅检查格式，不读取原始文件验证摘要；`environment` 等也是输入方声明。所有报告带有 `supplied-metadata-unverified`。示例是合成的预期判定，未运行真实 C++ 程序，不是 Polygon 导出或真实验题成果。
+常规比较的 `digest` 仅检查格式；`environment` 等也是输入方声明。比较报告仍带有 `supplied-metadata-unverified`。示例是合成的预期判定，不是 Polygon 导出或真实验题成果。
 
-测试内容匹配、具体测试增删改清单、编译及资源条件结构化建模、Polygon 离线适配、证据包核验、CI 和用户试用待完成。这个原型不宣称完成计划书验收。
+可额外核对原始文件：
+
+```powershell
+moon run cmd/moonverdict --target js -- verify examples/evidence/snapshot.json examples/evidence/bundle.json
+```
+
+此命令以清单所在目录为根，读取原始输入、答案和解法文件，用 SHA-256 核对内容。详见 [证据格式](docs/EVIDENCE.md)。核对通过仅说明当前文件内容与所提供摘要相符，不证明历史运行记录的来源；输出保留 `run_binding_verified: false`。
+
+测试内容匹配、具体测试增删改清单、编译及资源条件结构化建模、Polygon 离线适配、运行来源绑定和用户试用待完成。自动测试配置已加入仓库，云端结果以实际运行记录为准。这个原型不宣称完成计划书验收。
 
 项目不需要线上凭证。真实适配将依据 [Polygon API](https://codeforces.github.io/polygon-misc/API#probleminvocation)，特别处理 RJ/NO/TS、缺项和包级验证结果；目前尚未实现或验收该适配器。
 
