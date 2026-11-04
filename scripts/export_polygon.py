@@ -8,6 +8,7 @@ import getpass
 import hashlib
 import json
 from pathlib import Path
+import re
 import secrets
 import time
 import urllib.error
@@ -15,6 +16,50 @@ import urllib.parse
 import urllib.request
 
 READ_METHODS = {"problem.packages", "problem.invocations", "problem.invocation"}
+
+
+class ExportFailure(RuntimeError):
+    def __init__(self, method, http_status, reason_code, response_bytes=b""):
+        self.record = {"method": method, "http_status": http_status, "reason_code": reason_code,
+            "response_bytes_sampled": len(response_bytes),
+            "response_sample_sha256": hashlib.sha256(response_bytes).hexdigest(),
+            "retried": False}
+        super().__init__(f"{method}: HTTP {http_status}, reason={reason_code}; stopped without retry")
+
+
+def classify_failure(comment):
+    # Only emit fixed categories, never raw server text that could echo a secret.
+    text = comment.lower() if isinstance(comment, str) else ""
+    if re.search(r"\bpin\b", text):
+        return "PIN_REQUIRED_OR_INVALID"
+    if any(word in text for word in ("too many", "rate limit", "limit exceeded")):
+        return "RATE_LIMIT"
+    if "apisig" in text or "signature" in text:
+        return "AUTH_SIGNATURE"
+    if "apikey" in text or "api key" in text:
+        return "AUTH_KEY"
+    if any(word in text for word in ("timestamp", "time is out", "time difference", "time: ")):
+        return "AUTH_TIME"
+    if any(word in text for word in ("access", "permission", "problem not found")):
+        return "ACCESS_OR_NOT_FOUND"
+    if any(word in text for word in ("method not found", "unknown method", "invalid parameter")):
+        return "REQUEST_FORMAT"
+    return "UNCLASSIFIED"
+
+
+def http_failure(method, error):
+    try:
+        sample = error.read(65536)
+    except OSError:
+        sample = b""
+    finally:
+        error.close()
+    try:
+        envelope = json.loads(sample)
+        reason = classify_failure(envelope.get("comment")) if isinstance(envelope, dict) else "UNCLASSIFIED"
+    except (ValueError, UnicodeError):
+        reason = "NON_JSON_OR_TRUNCATED_RESPONSE" if sample else "NO_ERROR_BODY"
+    return ExportFailure(method, error.code, reason, sample)
 
 
 def api_request(method, parameters, key, secret):
@@ -30,11 +75,13 @@ def api_request(method, parameters, key, secret):
         with urllib.request.urlopen(request, timeout=30) as response:
             envelope = json.load(response)
     except urllib.error.HTTPError as error:
-        raise RuntimeError(f"Polygon HTTP status {error.code}; stopped without retry") from None
+        raise http_failure(method, error) from None
     except (urllib.error.URLError, TimeoutError):
         raise RuntimeError("Polygon connection failed; stopped without retry") from None
+    if not isinstance(envelope, dict):
+        raise ExportFailure(method, 200, "INVALID_ENVELOPE")
     if envelope.get("status") != "OK":
-        raise RuntimeError("Polygon API refused or failed the request; stopped without retry")
+        raise ExportFailure(method, 200, classify_failure(envelope.get("comment")))
     return envelope
 
 
@@ -78,8 +125,20 @@ def main():
     secret = getpass.getpass("Polygon API secret (local only): ")
     if not key or not secret:
         parser.error("Empty credentials")
+    if key != key.strip() or secret != secret.strip():
+        parser.error("Credentials contain leading or trailing whitespace; stopped before sending a request")
     try:
         invocations = export(args.problem_id, args.invocation_id, args.out, key, secret)
+    except ExportFailure as error:
+        # Keep any successful earlier responses and never replace a prior record.
+        try:
+            with (args.out / "failure.json").open("x", encoding="utf-8") as output:
+                json.dump(error.record, output, indent=2)
+                output.write("\n")
+        except OSError:
+            print("Could not save failure.json; no permissions were changed.")
+        print(f"Export stopped: {error}. Keep saved files. No retry or permission changes performed.")
+        return 2
     except (RuntimeError, ValueError, OSError, KeyError, TypeError) as error:
         print(f"Export stopped: {error}. Keep any files already saved. No retry or permission changes performed.")
         return 2

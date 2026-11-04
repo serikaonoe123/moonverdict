@@ -49,3 +49,22 @@ python scripts/export_polygon.py --problem-id 123456 --invocation-id 7890 --out 
 随后在 Polygon 中保存 selected-package.json 指向的同一包 ID、同一 revision 的题目包，放入 results/ 下。先告诉维护者本机保存目录，再核对材料并生成 context；无需分享账号凭证。未公开题目和真实导出保留在被 Git 忽略的 results/ 或 private/ 目录，不能把其中内容直接加入公开样例。
 
 导出脚本已做假传输、假凭证的离线测试，尚未代表官方服务实测成功。真实验收还需至少两份可关联的版本记录，核对导入、比较、诊断和实际题目变化是否一致。
+
+## 请求失败后的诊断
+
+HTTP 400 本身不足以确定原因。早期脚本只保留状态码，没有保存错误响应内容，因而无法追溯该次失败的具体原因。修订版读取同一次失败响应的有限内容，仅输出固定的 reason 分类，并在输出目录保存 failure.json：请求方法、HTTP 状态、类别、响应采样字节数及摘要。不会保存原始错误正文、请求签名或凭证。
+
+| reason | 表示服务端错误文字涉及的方向 |
+|---|---|
+| AUTH_KEY | API key |
+| AUTH_SIGNATURE | 请求签名 |
+| AUTH_TIME | 请求时间 |
+| PIN_REQUIRED_OR_INVALID | 题目 pin；当前脚本不支持输入 pin |
+| ACCESS_OR_NOT_FOUND | 权限或题目不可见 |
+| RATE_LIMIT | 请求频率或尝试次数限制 |
+| REQUEST_FORMAT | 方法或参数 |
+| NON_JSON_OR_TRUNCATED_RESPONSE / NO_ERROR_BODY / UNCLASSIFIED | 可用响应不足，无法进一步分类 |
+
+分类只是对错误文字的归纳，不是自动修复，也不是独立验证的故障根因。脚本不会据此更换凭证、改变接口、调整权限或自动重发请求。失败前已成功保存的记录保留。要再次采集，需由操作者明确重新运行，并选用新的输出目录。
+
+如果终端拒绝凭证首尾空白，说明脚本在联网前就已停止；不会偷偷修改凭证后发送。排查时只需提供 reason 和失败的方法，不需要分享 key、secret 或完整错误响应。
