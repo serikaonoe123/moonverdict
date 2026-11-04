@@ -1,0 +1,81 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "serikaonoe123/moonverdict"
+
+import {
+  "moonbitlang/core/json",
+}
+
+// Values
+pub fn compare(Snapshot, Snapshot) -> Report raise InputError
+
+pub fn parse_snapshot(String) -> Snapshot raise
+
+pub fn report_html(Report) -> String
+
+pub fn report_json(Report) -> String
+
+pub fn validate(Snapshot) -> Unit raise InputError
+
+// Errors
+pub suberror InputError {
+  Invalid(String)
+}
+
+// Types and methods
+pub(all) struct Artifact {
+  id : String
+  digest : String
+} derive(ToJson, @json.FromJson)
+pub fn Artifact::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Artifact::to_json(Self) -> Json
+
+pub(all) struct Finding {
+  code : String
+  solution : String
+  evidence : Array[String]
+  message : String
+} derive(ToJson)
+pub fn Finding::to_json(Self) -> Json
+
+pub(all) struct Report {
+  before_revision : String
+  after_revision : String
+  findings : Array[Finding]
+  evidence_level : String
+} derive(ToJson)
+pub fn Report::to_json(Self) -> Json
+
+pub(all) struct Run {
+  solution : String
+  test_id : String
+  verdict : String
+} derive(ToJson, @json.FromJson)
+pub fn Run::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Run::to_json(Self) -> Json
+
+pub(all) struct Snapshot {
+  schema_version : Int32
+  problem : String
+  revision : String
+  semantics : String
+  environment : String
+  checker : String
+  finished : Bool
+  tests : Array[Artifact]
+  solutions : Array[Solution]
+  runs : Array[Run]
+} derive(ToJson, @json.FromJson)
+pub fn Snapshot::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Snapshot::to_json(Self) -> Json
+
+pub(all) struct Solution {
+  id : String
+  digest : String
+  expected : String
+} derive(ToJson, @json.FromJson)
+pub fn Solution::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Solution::to_json(Self) -> Json
+
+// Type aliases
+
+// Traits

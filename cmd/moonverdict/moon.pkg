@@ -1,0 +1,9 @@
+import {
+  "serikaonoe123/moonverdict" @verdict,
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+pkgtype(kind: "executable")
+
+supported_targets = "js"

@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "problem": "self-authored-sum",
+  "revision": "before",
+  "semantics": "sum-v1",
+  "environment": "synthetic-fixture",
+  "checker": "integer-tokens-v1",
+  "finished": true,
+  "tests": [
+    {
+      "id": "small",
+      "digest": "0b7c61ec062aaab1e08e56c71f88ee85be1751d0131a5b9c6dce067ba1791b11"
+    },
+    {
+      "id": "large",
+      "digest": "3797e28de958b0320d1b70814d4d12b6886ca905e7721fc512f30f07d7bfc18e"
+    }
+  ],
+  "solutions": [
+    {
+      "id": "int32",
+      "digest": "9bdbcd2aa06ab2bb95cab578a6fa669a60bd2b6b70c68c366c11811582d3fd45",
+      "expected": "fail"
+    }
+  ],
+  "runs": [
+    {
+      "solution": "int32",
+      "test_id": "small",
+      "verdict": "AC"
+    },
+    {
+      "solution": "int32",
+      "test_id": "large",
+      "verdict": "WA"
+    }
+  ]
+}
