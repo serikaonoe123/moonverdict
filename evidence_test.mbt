@@ -2,6 +2,8 @@
 fn evidence_sample() -> @moonverdict.Snapshot {
   {
     schema_version: 1,
+    source: None,
+    import_notes: None,
     problem: "p",
     revision: "r",
     semantics: "s",

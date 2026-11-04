@@ -2,6 +2,8 @@
 fn sample() -> @moonverdict.Snapshot {
   {
     schema_version: 1,
+    source: None,
+    import_notes: None,
     problem: "sum",
     revision: "r1",
     semantics: "sum-v1",
@@ -251,6 +253,8 @@ test "HTML treats artifact IDs as text" {
     test_changes: [],
     witness_changes: [],
     evidence_level: "fixture",
+    before_source: None,
+    after_source: None,
   }
   let html = @moonverdict.report_html(report)
   assert_false(html.contains("<script>"))

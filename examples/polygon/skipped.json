@@ -1,0 +1,41 @@
+{
+  "status": "OK",
+  "result": {
+    "invocation": {
+      "id": 500,
+      "packageId": 100,
+      "testset": "tests",
+      "status": "FINISHED",
+      "violateTag": false,
+      "solutions": [
+        "int32"
+      ],
+      "tests": [
+        1,
+        2
+      ]
+    },
+    "solutionTags": [
+      {
+        "name": "int32",
+        "tag": "WA"
+      }
+    ],
+    "runs": [
+      {
+        "id": 901,
+        "solution": "int32",
+        "test": 1,
+        "verdict": "OK",
+        "violateTag": false
+      },
+      {
+        "id": 902,
+        "solution": "int32",
+        "test": 2,
+        "verdict": "RJ",
+        "violateTag": false
+      }
+    ]
+  }
+}

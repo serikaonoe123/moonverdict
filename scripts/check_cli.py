@@ -51,6 +51,16 @@ check(any(t["kind"] == "modified" and t["before_ids"] == ["large"] for t in repo
 lost = json.loads(changed.stdout)["witness_changes"]
 check(lost[0]["before_test"] == "large" and lost[0]["content_status"] == "removed" and lost[0]["after_test"] is None, "removed witness linked")
 
+polygon = ROOT / "examples/polygon"
+imported = run("import-polygon", polygon / "invocation.json", polygon / "context.json")
+parsed = json.loads(imported.stdout)
+check(imported.returncode == 0 and parsed["source"] == "polygon/package/100/invocation/500/testset/tests", "offline import")
+check(parsed["runs"][0]["verdict"] == "AC" and parsed["runs"][1]["verdict"] == "WA", "normalized verdicts")
+skipped = run("import-polygon", polygon / "skipped.json", polygon / "context.json")
+check(skipped.returncode == 1 and json.loads(skipped.stdout)["runs"][1]["verdict"] == "SKIPPED", "skipped is incomplete")
+check(run("import-polygon", polygon / "invocation.json", polygon / "wrong-package.json").returncode == 2, "wrong package")
+check(run("import-polygon", polygon / "missing.json", polygon / "context.json").returncode == 2, "missing API response")
+
 results = ROOT / "results"
 results.mkdir(exist_ok=True)
 (results / "example-report.html").write_text(html.stdout, encoding="utf-8")

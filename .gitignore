@@ -2,3 +2,5 @@ _build/
 .mooncakes/
 results/
 *.exe
+__pycache__/
+private/

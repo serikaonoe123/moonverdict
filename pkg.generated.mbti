@@ -8,9 +8,13 @@ import {
 // Values
 pub fn compare(Snapshot, Snapshot) -> Report raise InputError
 
+pub fn import_polygon(String, PolygonContext) -> Snapshot raise
+
 pub fn needs_review(Report) -> Bool
 
 pub fn parse_observed(String) -> ObservedArtifacts raise
+
+pub fn parse_polygon_context(String) -> PolygonContext raise
 
 pub fn parse_snapshot(String) -> Snapshot raise
 
@@ -49,9 +53,34 @@ pub(all) struct ObservedArtifacts {
 } derive(@json.FromJson)
 pub fn ObservedArtifacts::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
 
+pub(all) struct PolygonContext {
+  problem : String
+  package_id : Int64
+  package_revision : Int32
+  package_state : String
+  package_comment : String
+  invocation_id : Int64
+  testset : String
+  semantics : String
+  environment : String
+  checker : String
+  tests : Array[PolygonTestBinding]
+  solutions : Array[Artifact]
+} derive(@json.FromJson)
+pub fn PolygonContext::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+
+pub(all) struct PolygonTestBinding {
+  index : Int32
+  id : String
+  digest : String
+} derive(@json.FromJson)
+pub fn PolygonTestBinding::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+
 pub(all) struct Report {
   before_revision : String
   after_revision : String
+  before_source : String?
+  after_source : String?
   findings : Array[Finding]
   test_changes : Array[TestChange]
   witness_changes : Array[WitnessChange]
@@ -78,6 +107,8 @@ pub(all) struct Snapshot {
   tests : Array[Artifact]
   solutions : Array[Solution]
   runs : Array[Run]
+  source : String?
+  import_notes : Array[String]?
 } derive(ToJson, @json.FromJson)
 pub fn Snapshot::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
 pub fn Snapshot::to_json(Self) -> Json

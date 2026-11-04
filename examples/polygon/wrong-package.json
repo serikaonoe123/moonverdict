@@ -1,0 +1,30 @@
+{
+  "problem": "self-authored-sum",
+  "package_id": 101,
+  "package_revision": 1,
+  "package_state": "READY",
+  "package_comment": "",
+  "invocation_id": 500,
+  "testset": "tests",
+  "semantics": "sum-v1",
+  "environment": "synthetic-fixture",
+  "checker": "integer-tokens-v1",
+  "tests": [
+    {
+      "index": 1,
+      "id": "small",
+      "digest": "644392f247b8d73de6ec73d2c2dd379afcbbc41c33459135be8174f31d9b7b8c"
+    },
+    {
+      "index": 2,
+      "id": "large",
+      "digest": "55faf63a4b3413947dbce87c1a2aa543ecef9ca96200a16fe15e481a3dfb575a"
+    }
+  ],
+  "solutions": [
+    {
+      "id": "int32",
+      "digest": "41b711603ee16cbadd13f7a2536f78e5a78858c2459c7940ca548928e61e58e9"
+    }
+  ]
+}

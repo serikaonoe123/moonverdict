@@ -48,9 +48,9 @@ moon run cmd/moonverdict --target js -- verify examples/evidence/snapshot.json e
 
 此命令以清单所在目录为根，读取原始输入、答案和解法文件，用 SHA-256 核对内容。详见 [证据格式](docs/EVIDENCE.md)。核对通过仅说明当前文件内容与所提供摘要相符，不证明历史运行记录的来源；输出保留 `run_binding_verified: false`。
 
-测试内容匹配与失败证据清单的规则见 [测试变化说明](docs/TEST-CHANGES.md)。编译及资源条件结构化建模、Polygon 离线适配、运行来源绑定和用户试用待完成。自动测试配置已加入仓库，云端结果以实际运行记录为准。这个原型不宣称完成计划书验收。
+测试内容匹配与失败证据清单的规则见 [测试变化说明](docs/TEST-CHANGES.md)。编译及资源条件结构化建模、Polygon 真实导出验收、运行来源绑定和用户试用待完成。自动测试配置已加入仓库，云端结果以实际运行记录为准。这个原型不宣称完成计划书验收。
 
-项目不需要线上凭证。真实适配将依据 [Polygon API](https://codeforces.github.io/polygon-misc/API#probleminvocation)，特别处理 RJ/NO/TS、缺项和包级验证结果；目前尚未实现或验收该适配器。
+离线导入不需要线上凭证。Polygon 包验证导入器已实现，处理 RJ/NO/TS、缺项、包级诊断及材料 ID 不匹配；已用文档格式样例验证，真实导出验收尚待完成。使用命令和本机只读采集步骤见 [Polygon 导入与采集说明](docs/POLYGON.md)。
 
 ## 开发
 

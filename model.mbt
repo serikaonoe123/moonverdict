@@ -30,6 +30,8 @@ pub(all) struct Snapshot {
   tests : Array[Artifact]
   solutions : Array[Solution]
   runs : Array[Run]
+  source : String?
+  import_notes : Array[String]?
 } derive(ToJson, @json.FromJson)
 
 ///|
@@ -44,6 +46,8 @@ pub(all) struct Finding {
 pub(all) struct Report {
   before_revision : String
   after_revision : String
+  before_source : String?
+  after_source : String?
   findings : Array[Finding]
   test_changes : Array[TestChange]
   witness_changes : Array[WitnessChange]
@@ -135,10 +139,10 @@ fn keys(value : Json, allowed : Array[String]) -> Unit raise InputError {
 
 ///|
 pub fn parse_snapshot(text : String) -> Snapshot raise {
-  let value = @json.parse(text)
+  let value = @json.parse(text, reject_duplicate_keys=true)
   keys(value, [
     "schema_version", "problem", "revision", "semantics", "environment", "checker",
-    "finished", "tests", "solutions", "runs",
+    "finished", "tests", "solutions", "runs", "source", "import_notes",
   ])
   guard value is Object(fields) else { raise Invalid("expected snapshot") }
   for

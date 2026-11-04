@@ -17,6 +17,10 @@ extern "js" fn set_exit(code : Int32) -> Unit =
 ///|
 fn main {
   let args = @env.args()
+  if args.length() == 5 && args[2] == "import-polygon" {
+    import_polygon_files(args[3], args[4])
+    return
+  }
   if args.length() == 5 && args[2] == "verify" {
     verify_files(args[3], args[4])
     return

@@ -15,6 +15,7 @@ commands = [
     ["moon", "info"],
     ["git", "diff", "--exit-code", "--", "pkg.generated.mbti", "cmd/moonverdict/pkg.generated.mbti"],
     ["python", "scripts/check_cli.py"],
+    ["python", "scripts/test_export_polygon.py"],
 ]
 records = []
 for index, command in enumerate(commands):

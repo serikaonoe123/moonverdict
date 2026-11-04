@@ -28,6 +28,16 @@ pub fn compare(before : Snapshot, after : Snapshot) -> Report raise InputError {
     "different problems cannot be compared",
   )
   let findings : Array[Finding] = []
+  for snapshot in [before, after] {
+    for note in snapshot.import_notes.unwrap_or([]) {
+      findings.push({
+        code: "IMPORT_REVIEW",
+        solution: "",
+        evidence: [snapshot.revision],
+        message: note,
+      })
+    }
+  }
   let test_changes = compare_tests(before.tests, after.tests)
   let witness_changes : Array[WitnessChange] = []
   for sol in before.solutions {
@@ -167,6 +177,8 @@ pub fn compare(before : Snapshot, after : Snapshot) -> Report raise InputError {
   {
     before_revision: before.revision,
     after_revision: after.revision,
+    before_source: before.source,
+    after_source: after.source,
     findings,
     test_changes,
     witness_changes,
