@@ -7,6 +7,7 @@ license = "MIT"
 readme = "README.md"
 
 description = "Evidence-aware comparison of programming contest verification snapshots."
+repository = "https://github.com/serikaonoe123/moonverdict"
 
 preferred_target = "js"
 

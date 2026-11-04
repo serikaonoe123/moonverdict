@@ -1,0 +1,39 @@
+name: Verify MoonVerdict
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: hustcer/setup-moonbit@9199da0ab63ea0c0bab1dc15f03d76e17ed4f75f # v1.22
+        with:
+          version: '0.10.17+d971670cd'
+          core-version: '0.10.17+d971670cd'
+      - name: Check, build and test
+        run: python scripts/ci.py
+      - name: Keep verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verification-${{ matrix.os }}
+          path: results/
+          if-no-files-found: warn
